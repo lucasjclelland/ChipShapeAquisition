@@ -17,7 +17,7 @@ dBound=5000;
 t = (0:length(rxSig)-1)/fSamp; %time
 dShift=-dBound:dBin:dBound;
 
-for ii = 1:1:3 %refine
+for ii = 1:1:4 %refine
     
     for jj = 1:length(dShift)
         corrMatrix(jj,:)= abs(xcorr(repCode.*exp(1i*2*pi*dShift(jj)*t),rxSig));
@@ -34,7 +34,7 @@ for ii = 1:1:3 %refine
     plotdata(ii,:)={corrMatrix  peakFreq};
 end
 
-dFreq=peakFreq;
-shiftSig=rxSig.*exp(1i*2*pi*-dFreq*t.');
+dFreq=-peakFreq;
+shiftSig=rxSig.*exp(1i*2*pi*dFreq*t.');
 
 end

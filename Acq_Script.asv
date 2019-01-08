@@ -10,12 +10,11 @@ firstSamp = floor(fSamp/2)+floor(-8*fSamp/1000);
 rxSig = rxSig (firstSamp:firstSamp+N_Samp-1);
 
 %Make Ideal Signal
-codeShift=230;
-dopplerShift=-500;
-repCode=cacode(PRN,fSamp/1.023e6)*2-1;
+codeShift=225;
+dopplerShift=500;
 repCode=repmat(repCode,1,nMilSec)'; % repeat for number of mSecs
-t = (0:length(repCode)-1)/fSamp; %time
-%  rxSig=circshift(repCode,codeShift).*exp(-1i*2*pi*dopplerShift*t.');
+% t = (0:length(repCode)-1)/fSamp; %time
+rxSig=exp(-1i*2*pi*dopplerShift)*circshift(repCode,
 
 
 %Output dopFreq nad baseband sig
@@ -31,7 +30,7 @@ repCode=cacode(PRN,fSamp/1.023e6)*2-1;
 
 data=cTransitions(cShiftSig.*exp(1i*pi/8),dopFreq,PRN,fSamp);
 sumTrans=[];
-for idx3=1:135
+for idx3=1:180
     data=cTransitions(cShiftSig.*exp(1i*pi*idx3/180),dopFreq,PRN,fSamp);
     for idx2=1:4
         tmp=0;
