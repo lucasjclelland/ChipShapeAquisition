@@ -49,7 +49,13 @@ for aa=1:length(tran)
         leadChip=tran(aa).idx(bb)-1;
         lBound=sum(cBins(1:leadChip))+1; %find position in scaled matrix
         rBound=sum(cBins(1:leadChip+2));
-
+        if cBins(leadChip+1)==5
+            lBound=lBound+1;
+            
+        end
+        if cBins(leadChip+2)==5
+            rBound=rBound-1;
+        end
         tran(aa).bounds{bb}= rxSig(lBound:rBound);
     end
 end

@@ -1,7 +1,7 @@
 fSamp=5e6;
 PRN=2;
 nMilSec = 10;
-
+close all;
 
 N_Samp=ceil(fSamp*nMilSec/1000);
 
@@ -19,7 +19,25 @@ rxSig = rxSig (firstSamp:firstSamp+N_Samp-1);
 %Take Baseband circshifted sig, output the transitions
 
 repCode=cacode(PRN,fSamp/1.023e6)*2-1;
-cShiftSig=repmat(repCode,1,10)'; % repeat for number of mSecs
+% cShiftSig=repmat(repCode,1,10)'; % repeat for number of mSecs
 
-data=cTransitions(cShiftSig,dopFreq,PRN,fSamp);
+data=cTransitions(cShiftSig.*exp(1i*pi/8),dopFreq,PRN,fSamp);
 sumTrans=[];
+for idx3=1:180
+    data=cTransitions(cShiftSig.*exp(1i*pi*idx3/180),dopFreq,PRN,fSamp);
+    for idx2=1:4
+        tmp=0;
+        for idx=1:1500
+            tmp=tmp+((data(idx2).bounds{idx}));    
+        end
+        figure(1)
+        subplot(2,2,idx2)
+        plot(real(tmp))
+        grid('on');
+        title(sprintf('Type: %d',idx2))
+        hold('on');
+        plot(imag(tmp));
+        hold('off');
+    end
+    pause(.01);
+end
