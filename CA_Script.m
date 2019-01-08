@@ -1,101 +1,94 @@
 clc; clear; close all;
 %Generate SVcode1
-%Frac_Samp= 10e6/L1_ChipRate;
-L1_ChipRate=1.023e6; %chips/sec
-FSamp=5e6; %Sample rate Samples/sec
-Frac_Samp= FSamp./L1_ChipRate; %9.7752 samples per chip
+fSamp=5e6; %Sample rate Samples/sec
+nMilSec = 10;
+PRN=2;
+L1_ChipRate=1.023e6;
+Frac_Samp= 10e6/L1_ChipRate;
+repCode=cacode(PRN,fSamp/1.023e6)*2-1; %Frac_Samp= 10e6/L1_ChipRate;
+repCode=repmat(repCode,1,nMilSec);
+N_Samp=ceil(fSamp*nMilSec/1000);
 
-%Visible PRNs 3,4,9,16,22,23,26,27,31
-PRN=31;
-SV1=cacode(PRN,Frac_Samp)*2-1;
-% inputData = read_complex_binary_short('~/Desktop/clelland/Broadsim/broadsim-collections-60db/60db-radio1-20180212-155036',ceil(FSamp*.001));
-N_Samp=ceil(FSamp*.001 );
+% svPresent = [2 3 6 12 17 19 28]
+% Gears says 3   6  17  19  24
+inputData = read_complex_binary_short('B200_10MSPS_PapaBear_2018-06-22_16.40.44.bin',fSamp);
+firstSamp = floor(fSamp/2)+floor(-8*fSamp/1000);
+inputData = inputData (firstSamp:firstSamp+N_Samp-1);
 
-%
-inputData = read_complex_binary_short('D:\GPS RFDNA\broadsim-collections-60db\60db-radio1-20180212-155036',N_Samp);
+%% Filter
+[b,a]=butter(2,1e6/fSamp,'low'); %Wn=FilterBw3dBBHz/fSamp;
+% freqz(b,a)
+inputData=filtfilt(b,a,inputData);
 
-inc_Shift=333;
+%% Set up Shift
+incShift=333;
 %initial doppler shift
 dbound=5000;
-t = (0:length(inputData)-1)/FSamp; %time
-dShift=-dbound:inc_Shift:dbound;
+t = (0:length(inputData)-1)/fSamp; %time
+dShift=-dbound:incShift:dbound;
 
+%%
 
-
-
-for irefine=1:1:3
+for iRefine=1:1:3
     
     
     for idx=1:length(dShift)
-        t = (0:length(inputData)-1)/FSamp; %time
-        corrMatrix(idx,:)= abs(xcorr(SV1.*exp(1i*2*pi*dShift(idx)*t),inputData));
+        t = (0:length(inputData)-1)/fSamp; %time
+        corrMatrix(idx,:)= abs(xcorr(repCode.*exp(1i*2*pi*dShift(idx)*t),inputData));
         max_corr(idx)=max(corrMatrix(idx,:));
     end
-    figure(irefine);
-    surf(corrMatrix,'edgecolor','none');
-    x=size(corrMatrix);
-    ylabel(['Doppler Shifts: ' num2str(x(1))])
-    xlabel('Code Phase')
-    zlabel('Correlation')
-    title(['PRN ' num2str(PRN)])
     [~,index_Max]=max(corrMatrix(:));
-    
-    
-    
     %Simultaneosly find the index of the Doppler shift max and Code phase
-    [i_Dop,i_Code]=ind2sub(size(corrMatrix),index_Max);
-    shift_Freq=dShift(i_Dop);
-    
-    figure(8*irefine);
-    subplot(2,1,1)
-    
-    stem(dShift,max_corr(1:length(dShift)));
-    xlim([dShift(1)-inc_Shift dShift(end)+inc_Shift])
-    ylabel('Max Correlation')
-    xlabel('Frequency (Hz)')
-    title(['PRN ' num2str(PRN) ', Maximum Correlation at Each Doppler Shift Frequency'])
-    subplot(2,1,2)
-    plot(corrMatrix(i_Dop,:))
-    ylabel('Correlation')
-    xlabel('Time')
-    title(['PRN ' num2str(PRN) ', Dopler Shift = ' num2str(shift_Freq) 'Hz'])
-    
+    [iDop,iCode]=ind2sub(size(corrMatrix),index_Max);
+    shift_Freq=dShift(iDop);
+        
     %Refine based on honed in doppler
-    inc_Shift=ceil(inc_Shift/10);
+    incShift=ceil(incShift/10);
     dbound=dbound/10;
-    dShift=shift_Freq-dbound:inc_Shift:shift_Freq+dbound;
+    dShift=shift_Freq-dbound:incShift:shift_Freq+dbound;
+    
+    %plot
+    plotstuff(iRefine,corrMatrix,dShift,incShift,max_corr,iDop,PRN)
+
+    
 end
 
-%Find the Codephase
+%% Find the Codephase
 
-Code_shift=circshift(SV1,+i_Code);
+shiftCode=circshift(repCode,+iCode);
 
-Corr_Code=abs(xcorr(Code_shift.*exp(1i*2*pi*shift_Freq*t),inputData));
-[~,code_Max_index]=max(Corr_Code);
+corrCode=abs(xcorr(shiftCode.*exp(1i*2*pi*shift_Freq*t),inputData));
+[~,code_Max_index]=max(corrCode);
 
-
-Corr_Code_Center=ceil(length(Corr_Code)/2);
+codeCenter=ceil(length(corrCode)/2);
 direction='right';
 %If the i_Code shift direction is correct, the max correlation should be
 %right in the center. Otherwise REVERSE the direction of the code shift
-if ~((Corr_Code_Center-10<code_Max_index) && (code_Max_index<Corr_Code_Center+10))
+if ~((codeCenter-10<code_Max_index) && (code_Max_index<codeCenter+10))
     %Reverse Code Phase Direction
-    Code_shift=circshift(SV1,-i_Code);
+    shiftCode=circshift(repCode,-iCode);
     
-    Corr_Code=abs(xcorr(Code_shift.*exp(1i*2*pi*shift_Freq*t),inputData));
-    [~,code_Max_index]=max(Corr_Code);
+    corrCode=abs(xcorr(shiftCode.*exp(1i*2*pi*shift_Freq*t),inputData));
+    [~,code_Max_index]=max(corrCode);
     direction='left';
     
 end
 
-Code_Phase=ceil(i_Code/Frac_Samp);
-
-
-figure(irefine+2)
-plot(Corr_Code)
-    ylabel('Correlation')
-    xlabel('Time')
-    title(['PRN ' num2str(PRN) ', CodePhase: ' num2str(Code_Phase) ' bits to the ' direction])
+Code_Phase=ceil(iCode/Frac_Samp);
 
 disp(['Doppler Shift: ' num2str(shift_Freq) 'Hz']);
-disp(['CodePhase: ' num2str(Code_Phase) ' bits to the ' direction]);
+disp(['CodePhase: ' num2str(Code_Phase) ' chips to the ' direction]);
+figure(1);
+
+
+function    plotstuff(ii,corrMatrix,dShift,inc_Shift,max_corr,iDop,PRN)
+    figure(ii);
+%     surf(corrMatrix,'edgecolor','none');
+   plot(corrMatrix(iDop,:))
+%     x=size(corrMatrix);
+%     ylabel(['Doppler Shifts: ' num2str(x(1))])
+    xlabel('Code Phase')
+%     zlabel('Correlation')
+    title(['PRN ' num2str(PRN)])
+
+end
