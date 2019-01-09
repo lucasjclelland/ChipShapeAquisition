@@ -2,7 +2,7 @@ clc; clear; close all;
 %Generate SVcode1
 fSamp=5e6; %Sample rate Samples/sec
 nMilSec = 10;
-PRN=2;
+PRN=1;
 L1_ChipRate=1.023e6;
 Frac_Samp= 10e6/L1_ChipRate;
 repCode=cacode(PRN,fSamp/1.023e6)*2-1; %Frac_Samp= 10e6/L1_ChipRate;

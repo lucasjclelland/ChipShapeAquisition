@@ -15,18 +15,7 @@ sampCode=repmat(sampCode,1,mSecs); % repeat for number of mSecs
 %% Transitions of refrence Code
 trans=[-1 -1 ; -1 1; 1 -1; 1 1];
 for ii=1:length(trans)
-    tran(ii).idx=strfind(refCode,trans(ii,:));
-    jj=2;
-    
-    while jj<=length(tran(ii).idx) %while because tran changes size
-        %if idx goes 14,15,16,17 then its a bunch of 1 1 1 1 1 so just take one
-        if tran(ii).idx(jj-1) ==  tran(ii).idx(jj)-1
-            tran(ii).idx(jj)=[]; %delete overlap.....13,14,15,16,17>>13,15,17
-        end
-        jj=jj+1;
-        
-        
-    end
+    tran(ii).idx=strfind(refCode,trans(ii,:)); 
 end
 
 
@@ -49,14 +38,14 @@ for aa=1:length(tran)
         leadChip=tran(aa).idx(bb)-1;
         lBound=sum(cBins(1:leadChip))+1; %find position in scaled matrix
         rBound=sum(cBins(1:leadChip+2));
+        %cut off
         if cBins(leadChip+1)==5
-            lBound=lBound+1;
-            
+            lBound=lBound+1;   
         end
         if cBins(leadChip+2)==5
             rBound=rBound-1;
         end
-        tran(aa).bounds{bb}= rxSig(lBound:rBound);
+        tran(aa).bounds(bb,:)= rxSig(lBound:rBound);
     end
 end
 

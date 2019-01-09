@@ -28,12 +28,10 @@ for ii = 1:1:4 %refine
     [maxPeak,peakBin]=max(maxCorr);
     peakFreq=dShift(peakBin);
     
-    if ii==3
-        maxDiff=maxPeak-(mean(corrMatrix(:)))
-        plotstuff(ii,corrMatrix,dShift,peakBin,PRN)
+    if ii==1
+        maxDiff=20*log10(maxPeak)-20*log10(mean(corrMatrix(16)));
+        
     end
-    
-    
     % Queue next bounds to zoom in
     dBin=ceil(dBin/10);
     dBound=dBound/10;
