@@ -1,5 +1,6 @@
 fSamp=5e6;
-PRN=2;
+fSamp = myFSamp;
+PRN=5;
 nMilSec = 10;
 close all;
 
@@ -8,13 +9,13 @@ N_Samp=ceil(fSamp*nMilSec/1000);
 rxSig=read_complex_binary_short('B200_10MSPS_PapaBear_2018-06-22_16.40.44.bin',fSamp);
 firstSamp = floor(fSamp/2)+floor(-8*fSamp/1000);
 rxSig = rxSig (firstSamp:firstSamp+N_Samp-1);
-
+rxSig = mySignal.';
 %Make Ideal Signal
-codeShift=230;
-dopplerShift=-500;
-repCode=cacode(PRN,fSamp/1.023e6)*2-1;
-repCode=repmat(repCode,1,nMilSec)'; % repeat for number of mSecs
-t = (0:length(repCode)-1)/fSamp; %time
+%codeShift=230;
+%dopplerShift=-500;
+%repCode=cacode(PRN,fSamp/1.023e6)*2-1;
+%repCode=repmat(repCode,1,nMilSec)'; % repeat for number of mSecs
+%t = (0:length(repCode)-1)/fSamp; %time
 %  rxSig=circshift(repCode,codeShift).*exp(-1i*2*pi*dopplerShift*t.');
 
 
@@ -26,16 +27,16 @@ t = (0:length(repCode)-1)/fSamp; %time
 
 %Take Baseband circshifted sig, output the transitions
 
-repCode=cacode(PRN,fSamp/1.023e6)*2-1;
+%repCode=cacode(PRN,fSamp/1.023e6)*2-1;
 
-
+%cShiftSig = cShiftSig.*repCode;
 data=cTransitions(cShiftSig.*exp(1i*pi/8),dopFreq,PRN,fSamp);
 sumTrans=[];
-for idx3=1:135
-    data=cTransitions(cShiftSig.*exp(1i*pi*idx3/180),dopFreq,PRN,fSamp);
+for idx3=1:90
+    data=cTransitions(cShiftSig.*exp(1i*pi*idx3/90),dopFreq,PRN,fSamp);
     for idx2=1:4
         tmp=0;
-        for idx=1:1500
+        for idx=1:30000
             tmp=tmp+((data(idx2).bounds{idx}));    
         end
         figure(1)
