@@ -1,5 +1,5 @@
 function [dFreq,shiftSig]=dopAcq(rxSig,PRN,fSamp)
-
+rxSig = rxSig(:);
 mSecs=length(rxSig)/(fSamp/1000); %number of codes in rxSig
 
 % CA Code
@@ -7,9 +7,9 @@ repCode=cacode(PRN,fSamp/1.023e6)*2-1;
 repCode=repmat(repCode,1,mSecs); % repeat for number of mSecs
 
 % Filter
-%[b,a]=butter(2,1e6/fSamp,'low'); %Wn=FilterBw3dBBHz/fSamp;
+[b,a]=butter(2,1e6/fSamp,'low'); %Wn=FilterBw3dBBHz/fSamp;
 % freqz(b,a)
-%rxSig=filtfilt(b,a,rxSig);
+rxSig=filtfilt(b,a,rxSig);
 
 %Doppler Bins
 dBin=333;
@@ -47,7 +47,7 @@ for ii = 1:1:4 %refine
     plotdata(ii,:)={corrMatrix  peakFreq};
 end
 
-dFreq=-peakFreq;
-shiftSig=rxSig.*exp(1i*2*pi*dFreq*t.');
+dFreq=peakFreq;
+shiftSig=rxSig.*exp(-1i*2*pi*dFreq*t.');
 
 end

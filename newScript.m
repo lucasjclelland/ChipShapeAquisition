@@ -25,5 +25,7 @@ mySignal = mySignal./max(mySignal);
 
 [estDoppler,bbSignal]=myEstimate(mySignal,2,myFSamp);
 
+[dFreq,shiftSig]=dopAcq(mySignal,2,myFSamp);
+
 
 
