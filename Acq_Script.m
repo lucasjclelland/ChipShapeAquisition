@@ -1,6 +1,6 @@
 fSamp=5e6;
-% fSamp = myFSamp;
-PRN=1;
+fSamp = myFSamp;
+PRN=2;
 nMilSec = 10;
 close all;
 
@@ -8,8 +8,9 @@ N_Samp=ceil(fSamp*nMilSec/1000);
 
 rxSig=read_complex_binary_short('B200_10MSPS_PapaBear_2018-06-22_16.40.44.bin',fSamp);
 firstSamp = floor(fSamp/2)+floor(-8*fSamp/1000);
+firstSamp = 1;
+rxSig = mySignal.';
 rxSig = rxSig (firstSamp:firstSamp+N_Samp-1);
-% rxSig = mySignal.';
 %Make Ideal Signal
 %codeShift=230;
 %dopplerShift=-500;

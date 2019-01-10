@@ -1,8 +1,10 @@
-clc; clear; close all;
+%clc; clear; close all;
 %Generate SVcode1
+%newScript
 fSamp=5e6; %Sample rate Samples/sec
-nMilSec = 10;
-PRN=1;
+fSamp=myFSamp
+nMilSec = 40;
+PRN=12;
 L1_ChipRate=1.023e6;
 Frac_Samp= 10e6/L1_ChipRate;
 repCode=cacode(PRN,fSamp/1.023e6)*2-1; %Frac_Samp= 10e6/L1_ChipRate;
@@ -13,10 +15,13 @@ N_Samp=ceil(fSamp*nMilSec/1000);
 % Gears says 3   6  17  19  24
 inputData = read_complex_binary_short('B200_10MSPS_PapaBear_2018-06-22_16.40.44.bin',fSamp);
 firstSamp = floor(fSamp/2)+floor(-8*fSamp/1000);
+firstSamp =1;
+inputData=mySignal.';
+
 inputData = inputData (firstSamp:firstSamp+N_Samp-1);
 
 %% Filter
-[b,a]=butter(2,1e6/fSamp,'low'); %Wn=FilterBw3dBBHz/fSamp;
+[b,a]=butter(4,1e6/fSamp,'low'); %Wn=FilterBw3dBBHz/fSamp;
 % freqz(b,a)
 inputData=filtfilt(b,a,inputData);
 
@@ -48,7 +53,7 @@ for iRefine=1:1:3
     dShift=shift_Freq-dbound:incShift:shift_Freq+dbound;
     
     %plot
-    plotstuff(iRefine,corrMatrix,dShift,incShift,max_corr,iDop,PRN)
+   % plotstuff(iRefine,corrMatrix,dShift,incShift,max_corr,iDop,PRN)
 
     
 end
@@ -81,14 +86,14 @@ disp(['CodePhase: ' num2str(Code_Phase) ' chips to the ' direction]);
 figure(1);
 
 
-function    plotstuff(ii,corrMatrix,dShift,inc_Shift,max_corr,iDop,PRN)
-    figure(ii);
-%     surf(corrMatrix,'edgecolor','none');
-   plot(corrMatrix(iDop,:))
-%     x=size(corrMatrix);
-%     ylabel(['Doppler Shifts: ' num2str(x(1))])
-    xlabel('Code Phase')
-%     zlabel('Correlation')
-    title(['PRN ' num2str(PRN)])
-
-end
+% function    plotstuff(ii,corrMatrix,dShift,inc_Shift,max_corr,iDop,PRN)
+%     figure(ii);
+% %     surf(corrMatrix,'edgecolor','none');
+%    plot(corrMatrix(iDop,:))
+% %     x=size(corrMatrix);
+% %     ylabel(['Doppler Shifts: ' num2str(x(1))])
+%     xlabel('Code Phase')
+% %     zlabel('Correlation')
+%     title(['PRN ' num2str(PRN)])
+% 
+% end

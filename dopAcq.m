@@ -7,9 +7,9 @@ repCode=cacode(PRN,fSamp/1.023e6)*2-1;
 repCode=repmat(repCode,1,mSecs); % repeat for number of mSecs
 
 % Filter
-[b,a]=butter(2,1e6/fSamp,'low'); %Wn=FilterBw3dBBHz/fSamp;
+%[b,a]=butter(2,1e6/fSamp,'low'); %Wn=FilterBw3dBBHz/fSamp;
 % freqz(b,a)
-rxSig=filtfilt(b,a,rxSig);
+%rxSig=filtfilt(b,a,rxSig);
 
 %Doppler Bins
 dBin=333;
@@ -29,8 +29,13 @@ for ii = 1:1:4 %refine
     peakFreq=dShift(peakBin);
     
     if ii==3
-        maxDiff=maxPeak-(mean(corrMatrix(:)))
-        plotstuff(ii,corrMatrix,dShift,peakBin,PRN)
+        tmp=10*log10(abs(corrMatrix.^2));
+        maxPeak = max(tmp);
+        maxDiff = maxPeak-mean(tmp(:));
+        %maxDiff=maxPeak-(mean(corrMatrix(:)))
+        %plotstuff(ii,corrMatrix,dShift,peakBin,PRN)
+        %plotstuff(ii,tmp,dShift,peakBin,PRN)
+        surf((tmp));
     end
     
     
