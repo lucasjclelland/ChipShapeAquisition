@@ -10,12 +10,12 @@ repCode=repmat(repCode,1,mSecs); % repeat for number of mSecs
 t = (0:length(rxSig)-1)/fSamp; %time
 
 %Correlate
-[r,lags]=xcorr(repCode.*exp(1i*2*pi*t),rxSig);
+[r,lags]=xcorr(rxSig,repCode.*exp(1i*2*pi*t));
 [~,cMax]=max(abs(r));
 
 cPhase=lags(cMax); 
 
-cShiftSig=circshift(rxSig,cPhase);
+cShiftSig=circshift(rxSig,-cPhase); %negative, shift it back
 end
 
 

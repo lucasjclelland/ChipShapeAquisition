@@ -28,7 +28,7 @@ end
 for zz=1:1:1023
     cBins(zz)=sum(cSamps==zz);
 end
-cSampDiff=max(cBins)-min(cBins);
+cSampDiff=max(cBin)-
 cBins=repmat(cBins,1,mSecs); % # samps per chip in mSecs
 
 %% Create Bounds for each chip
@@ -40,10 +40,10 @@ for aa=1:length(tran)
         rBound=sum(cBins(1:leadChip+2));
         %cut off
         if cBins(leadChip+1)==5
-            lBound=lBound+cSampDiff;   
+            lBound=lBound+1;   
         end
         if cBins(leadChip+2)==5
-            rBound=rBound-cSampDiff;
+            rBound=rBound-1;
         end
         tran(aa).bounds(bb,:)= rxSig(lBound:rBound);
     end
